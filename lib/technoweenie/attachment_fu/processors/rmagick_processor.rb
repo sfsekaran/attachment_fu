@@ -12,7 +12,18 @@ module Technoweenie # :nodoc:
           # Yields a block containing an RMagick Image for the given binary data.
           def with_image(file, &block)
             begin
-              binary_data = file.is_a?(Magick::Image) ? file : Magick::ImageList.read(file).first unless !Object.const_defined?(:Magick)
+              if Object.const_defined?(:Magick)
+                binary_data = if file.is_a?(Magick::Image)
+                                file
+                              else
+                                data = Magick::ImageList.read(file).first
+                                if data.length > 1
+                                  data
+                                else
+                                  Magick::Image.read(file).first
+                                end
+                              end
+              end
               binary_data && binary_data.auto_orient!
             rescue
               # Log the failure to load the image.  This should match ::Magick::ImageMagickError
@@ -31,8 +42,8 @@ module Technoweenie # :nodoc:
           return unless process_attachment_without_processing
           with_image do |img|
             resize_image_or_thumbnail! img
-            self.width  = img.first.columns if respond_to?(:width)
-            self.height = img.first.rows    if respond_to?(:height)
+            self.width  = img.columns if respond_to?(:width)
+            self.height = img.rows    if respond_to?(:height)
             callback_with_args :after_resize, img
           end if image?
         end
@@ -51,8 +62,8 @@ module Technoweenie # :nodoc:
               image.resize!(cols<1 ? 1 : cols, rows<1 ? 1 : rows)
             }
           end
-          self.width  = img.first.columns if respond_to?(:width)
-          self.height = img.first.rows    if respond_to?(:height)
+          self.width  = img.columns if respond_to?(:width)
+          self.height = img.rows    if respond_to?(:height)
           img = img.sharpen if attachment_options[:sharpen_on_resize] && img.changed?
           img.strip! unless attachment_options[:keep_profile]
           quality = img.format.to_s[/JPEG/] && get_jpeg_quality
