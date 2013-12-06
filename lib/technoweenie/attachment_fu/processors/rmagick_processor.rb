@@ -31,8 +31,8 @@ module Technoweenie # :nodoc:
           return unless process_attachment_without_processing
           with_image do |img|
             resize_image_or_thumbnail! img
-            self.width  = img.columns if respond_to?(:width)
-            self.height = img.rows    if respond_to?(:height)
+            self.width  = img.first.columns if respond_to?(:width)
+            self.height = img.first.rows    if respond_to?(:height)
             callback_with_args :after_resize, img
           end if image?
         end
@@ -51,8 +51,8 @@ module Technoweenie # :nodoc:
               image.resize!(cols<1 ? 1 : cols, rows<1 ? 1 : rows)
             }
           end
-          self.width  = img.columns if respond_to?(:width)
-          self.height = img.rows    if respond_to?(:height)
+          self.width  = img.first.columns if respond_to?(:width)
+          self.height = img.first.rows    if respond_to?(:height)
           img = img.sharpen if attachment_options[:sharpen_on_resize] && img.changed?
           img.strip! unless attachment_options[:keep_profile]
           quality = img.format.to_s[/JPEG/] && get_jpeg_quality
