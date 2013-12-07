@@ -13,16 +13,16 @@ module Technoweenie # :nodoc:
           def with_image(file, &block)
             begin
               if Object.const_defined?(:Magick)
-                binary_data = if file.is_a?(Magick::Image)
-                                file
-                              else
-                                data = Magick::ImageList.read(file).first
-                                if data.length > 1
-                                  data
+                if file.is_a?(Magick::Image)
+                  binary_data = file
+                else
+                  list = Magick::ImageList.new.read(file)
+                  binary_data = if list.length > 1
+                                  list
                                 else
-                                  Magick::Image.read(file).first
+                                  list.first
                                 end
-                              end
+                end
               end
               binary_data && binary_data.auto_orient!
             rescue
