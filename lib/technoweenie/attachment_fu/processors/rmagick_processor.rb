@@ -18,7 +18,8 @@ module Technoweenie # :nodoc:
                 else
                   list = Magick::ImageList.new.read(file)
                   binary_data = if list.length > 1
-                                  list
+                                  #list
+                                  nil # attempt to get gifs at least uploading without transformation/resizing.
                                 else
                                   list.first
                                 end
